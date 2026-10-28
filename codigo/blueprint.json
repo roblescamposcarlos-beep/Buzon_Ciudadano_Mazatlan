@@ -1,0 +1,162 @@
+{
+	"name": "Buzon_Ciudadano_RobertoRobles",
+	"flow": [
+		{
+			"id": 1,
+			"module": "telegram:WatchUpdates",
+			"version": 1,
+			"mapper": {},
+			"parameters": { "__IMTHOOK__": 2988741 },
+			"metadata": {
+				"restore": { "parameters": { "__IMTHOOK__": { "data": { "editable": "false" }, "label": "Buzon_Ciudadano_RobertoRobles" } } },
+				"designer": { "x": 0, "y": 0 },
+				"parameters": [ { "name": "__IMTHOOK__", "type": "hook:telegramapi", "label": "Webhook", "required": true } ]
+			}
+		},
+		{
+			"id": 2,
+			"module": "builtin:BasicRouter",
+			"version": 1,
+			"mapper": {},
+			"metadata": { "designer": { "x": 300, "y": 0 } },
+			"routes": [
+				{
+					"flow": [
+						{
+							"id": 3,
+							"module": "util:SetVariable2",
+							"version": 1,
+							"filter": {
+								"name": "No es comando",
+								"conditions": [ [
+									{ "a": "{{1.message.text}}", "o": "exist" },
+									{ "a": "{{1.message.text}}", "b": "/", "o": "text:notstartwith" }
+								] ]
+							},
+							"parameters": {},
+							"mapper": { "name": "folio", "value": "AMB-{{formatDate(now; \"YYMMDD-HHmmss\")}}" },
+							"metadata": { "designer": { "x": 600, "y": -150 } }
+						},
+						{
+							"id": 4,
+							"module": "google-sheets:addRow",
+							"version": 2,
+							"parameters": { "__IMTCONN__": 10844562 },
+							"mapper": {
+								"from": "drive",
+								"mode": "select",
+								"values": {
+									"0": "{{3.folio}}",
+									"1": "{{formatDate(now; \"DD/MM/YYYY HH:mm\")}}",
+									"2": "{{1.message.from.username}}",
+									"3": "{{1.message.from.first_name}}",
+									"4": "{{1.message.text}}",
+									"5": "Recibido"
+								},
+								"sheetId": "Reportes",
+								"spreadsheetId": "TU_SPREADSHEET_ID",
+								"includesHeaders": true,
+								"insertDataOption": "INSERT_ROWS",
+								"useColumnHeaders": false,
+								"valueInputOption": "USER_ENTERED",
+								"insertUnformatted": false
+							},
+							"metadata": {
+								"restore": {
+									"expect": {
+										"from": { "label": "My Drive" },
+										"mode": { "label": "Search by path" },
+										"sheetId": { "label": "Reportes" },
+										"spreadsheetId": { "path": [ "Buzon_Ciudadano_RobertoRobles" ] },
+										"includesHeaders": { "label": "Yes" },
+										"useColumnHeaders": { "label": "No" }
+									},
+									"parameters": { "__IMTCONN__": { "data": { "scoped": "true", "connection": "google" }, "label": "Carlos's Google connection" } }
+								},
+								"designer": { "x": 900, "y": -150 },
+								"parameters": [ { "name": "__IMTCONN__", "type": "account:google", "label": "Connection", "required": true } ]
+							}
+						},
+						{
+							"id": 5,
+							"module": "telegram:SendReplyMessage",
+							"version": 1,
+							"parameters": { "__IMTCONN__": 11980256 },
+							"mapper": {
+								"text": "Reporte recibido.\nTu folio es: {{3.folio}}\nEstatus: Recibido\nGuarda este número para dar seguimiento a tu reporte.",
+								"chatId": "{{1.message.chat.id}}",
+								"parseMode": "",
+								"replyMarkup": "",
+								"messageThreadId": "",
+								"replyToMessageId": "",
+								"replyMarkupAssembleType": "reply_markup_enter"
+							},
+							"metadata": {
+								"restore": {
+									"expect": {
+										"parseMode": { "label": "Empty" },
+										"replyMarkupAssembleType": { "label": "Enter the Reply Markup" }
+									},
+									"parameters": { "__IMTCONN__": { "data": { "scoped": "true", "connection": "telegram" }, "label": "Buzon Ciudadano" } }
+								},
+								"designer": { "x": 1200, "y": -150 },
+								"parameters": [ { "name": "__IMTCONN__", "type": "account:telegram", "label": "Connection", "required": true } ]
+							}
+						}
+					]
+				},
+				{
+					"flow": [
+						{
+							"id": 6,
+							"module": "telegram:SendReplyMessage",
+							"version": 1,
+							"filter": {
+								"name": "Comando /start",
+								"conditions": [ [ { "a": "{{1.message.text}}", "b": "/start", "o": "text:equal" } ] ]
+							},
+							"parameters": { "__IMTCONN__": 11980256 },
+							"mapper": {
+								"text": "👋 Hola, soy el Buzón Ambiental Ciudadano de Mazatlán.\n\nPara levantar un reporte, envíame un solo mensaje con este formato:\nColonia - Problema\n\nEjemplo:\nJuan Carrasco - Basura acumulada en el canal de la calle principal\n\nTe responderé con un folio para que puedas dar seguimiento a tu reporte.\n⚠️ No incluyas datos personales de terceros (nombres, teléfonos o domicilios exactos); describe el lugar con la calle o una referencia.",
+								"chatId": "{{1.message.chat.id}}",
+								"parseMode": "",
+								"replyMarkup": "",
+								"messageThreadId": "",
+								"replyToMessageId": "",
+								"replyMarkupAssembleType": "reply_markup_enter"
+							},
+							"metadata": {
+								"restore": {
+									"expect": {
+										"parseMode": { "label": "Empty" },
+										"replyMarkupAssembleType": { "label": "Enter the Reply Markup" }
+									},
+									"parameters": { "__IMTCONN__": { "data": { "scoped": "true", "connection": "telegram" }, "label": "Buzon Ciudadano" } }
+								},
+								"designer": { "x": 600, "y": 150 },
+								"parameters": [ { "name": "__IMTCONN__", "type": "account:telegram", "label": "Connection", "required": true } ]
+							}
+						}
+					]
+				}
+			]
+		}
+	],
+	"metadata": {
+		"instant": true,
+		"version": 1,
+		"designer": { "orphans": [] },
+		"scenario": {
+			"dlq": false,
+			"slots": null,
+			"dataloss": false,
+			"maxErrors": 3,
+			"autoCommit": true,
+			"roundtrips": 1,
+			"sequential": false,
+			"confidential": false,
+			"freshVariables": false,
+			"autoCommitTriggerLast": true
+		}
+	}
+}
